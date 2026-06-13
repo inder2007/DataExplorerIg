@@ -1,0 +1,44 @@
+{
+  "TreeNodes": [
+    {
+      "Name": "Templates",
+      "Children": [
+        { "Name": "Drag Template 1", "Children": [] },
+        { "Name": "Drag Template 2", "Children": [] }
+      ]
+    },
+    {
+      "Name": "Projects",
+      "Children": [
+        { "Name": "Internal Logistics", "Children": [] },
+        { "Name": "External Clients", "Children": [] },
+        { "Name": "R&D", "Children": [] }
+      ]
+    },
+    {
+      "Name": "Archived",
+      "Children": [
+        { "Name": "2024 Archive", "Children": [] },
+        { "Name": "2023 Archive", "Children": [] }
+      ]
+    }
+  ],
+  "Projects": [
+    { "Id": "8821-X", "Name": "Global Logistics Hub", "Budget": 150000.0, "Status": "Active", "Category": "Internal Logistics", "Details": "Infrastructure upgrade for Q3. Requires constant monitoring." },
+    { "Id": "8822-A", "Name": "North Regional Data", "Budget": 85000.0, "Status": "Pending", "Category": "Internal Logistics", "Details": "Cloud assets migration timeline delayed by 2 weeks." },
+    { "Id": "8823-B", "Name": "Synthetic Pipeline Alpha", "Budget": 320000.0, "Status": "Completed", "Category": "R&D", "Details": "Processing pipeline securely connected via AES-256-GCM." },
+    { "Id": "8824-C", "Name": "Client Portal Revamp", "Budget": 45000.0, "Status": "Active", "Category": "External Clients", "Details": "UI/UX updates for the main corporate client facing portal." },
+    { "Id": "8825-D", "Name": "Acme Corp Integration", "Budget": 12000.0, "Status": "Active", "Category": "External Clients", "Details": "API integration for Acme Corp payment systems." },
+    { "Id": "8826-E", "Name": "Quantum Core Routing", "Budget": 980000.0, "Status": "Pending", "Category": "R&D", "Details": "Experimental routing protocol testing environment." },
+    { "Id": "8827-F", "Name": "Legacy Database Decommission", "Budget": 5000.0, "Status": "Completed", "Category": "2024 Archive", "Details": "Decommissioned 5 SQL Server 2012 nodes." },
+    { "Id": "8828-G", "Name": "Site B Expansion", "Budget": 230000.0, "Status": "Completed", "Category": "2023 Archive", "Details": "Physical data center expansion in Region B." }
+  ],
+  "Tasks": [
+    { "Id": "T-101", "Title": "Server Upgrade", "Description": "Upgrading main database server to 128GB RAM.", "Assignee": "Alice", "Priority": "High", "Date": "2026-06-10" },
+    { "Id": "T-102", "Title": "Security Audit", "Description": "Quarterly compliance check.", "Assignee": "Bob", "Priority": "Medium", "Date": "2026-06-15" },
+    { "Id": "T-103", "Title": "Deploy Microservice", "Description": "Pushing the new auth service to prod.", "Assignee": "Charlie", "Priority": "High", "Date": "2026-06-12" },
+    { "Id": "T-104", "Title": "Fix CSS Bugs", "Description": "Resolve layout issues on mobile screens for dashboard.", "Assignee": "Diana", "Priority": "Low", "Date": "2026-06-20" },
+    { "Id": "T-105", "Title": "Update Documentation", "Description": "Document the new API endpoints introduced in v2.4.", "Assignee": "Eve", "Priority": "Low", "Date": "2026-06-25" },
+    { "Id": "T-106", "Title": "Client Onboarding", "Description": "Walkthrough session with the Acme Corp technical team.", "Assignee": "Frank", "Priority": "Medium", "Date": "2026-06-18" }
+  ]
+}

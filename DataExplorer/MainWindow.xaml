@@ -1,0 +1,339 @@
+<Window x:Class="DataExplorer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:DataExplorer"
+        xmlns:ig="http://schemas.infragistics.com/xaml"
+        xmlns:igDP="http://schemas.infragistics.com/xaml/wpf"
+        xmlns:igWindows="http://schemas.infragistics.com/xaml/wpf"
+        xmlns:igEditors="http://schemas.infragistics.com/xaml/wpf"
+        Title="WPF MVVM Data Explorer with Infragistics" Height="751" Width="1174" WindowStartupLocation="CenterScreen">
+    
+    <Window.DataContext>
+        <local:MainViewModel />
+    </Window.DataContext>
+
+    <Window.Resources>
+        <DataTemplate x:Key="GridViewTemplate">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="180"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="250"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Infragistics XamDataTree on Left -->
+                <GroupBox Grid.Row="0" Grid.Column="0" Header="Solution Explorer" Margin="5">
+                    <ig:XamDataTree x:Name="TreeNodes" AutomationProperties.AutomationId="TreeNodes" ItemsSource="{Binding DataContext.TreeNodes, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                    ActiveNodeChanged="TreeView_ActiveNodeChanged"
+                                    PreviewMouseLeftButtonDown="TreeNodes_PreviewMouseLeftButtonDown"
+                                    PreviewMouseMove="TreeNodes_PreviewMouseMove"
+                                    BorderThickness="0">
+                        <ig:XamDataTree.GlobalNodeLayouts>
+                            <ig:NodeLayout Key="ChildrenLayout" TargetTypeName="TreeNode" DisplayMemberPath="Name">
+                            </ig:NodeLayout>
+                        </ig:XamDataTree.GlobalNodeLayouts>
+                    </ig:XamDataTree>
+                </GroupBox>
+
+                <!-- Draggable Splitter -->
+                <GridSplitter Grid.Row="0" Grid.Column="1" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"/>
+
+                <!-- Infragistics XamDataGrid on Right -->
+                <DockPanel Grid.Row="0" Grid.Column="2" Margin="5">
+                    <!-- Filter box -->
+                    <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Filter Records: " VerticalAlignment="Center" />
+                        <TextBox x:Name="SearchTextBox" AutomationProperties.AutomationId="SearchTextBox" Text="{Binding DataContext.SearchText, RelativeSource={RelativeSource AncestorType=Window}, UpdateSourceTrigger=PropertyChanged}" Width="250" Padding="2" />
+                    </StackPanel>
+                    
+                    <!-- Infragistics XamDataGrid -->
+                    <igDP:XamDataGrid x:Name="ProjectsDataGrid" AutomationProperties.AutomationId="ProjectsDataGrid" DataSource="{Binding DataContext.ProjectsView, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                      ActiveDataItem="{Binding DataContext.SelectedProject, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                      SelectedDataItem="{Binding DataContext.SelectedProject, RelativeSource={RelativeSource AncestorType=Window}, Mode=TwoWay}"
+                                      EditModeStarting="ProjectsDataGrid_EditModeStarting"
+                                      MouseDoubleClick="DataGrid_MouseDoubleClick" AllowDrop="True" PreviewDrop="ProjectsDataGrid_Drop" 
+                                      PreviewDragOver="ProjectsDataGrid_PreviewDragOver"
+                                      GroupByAreaLocation="AboveDataArea">
+                        <igDP:XamDataGrid.FieldSettings>
+                            <igDP:FieldSettings AllowRecordFiltering="True" LabelClickAction="SortByOneFieldOnly" />
+                        </igDP:XamDataGrid.FieldSettings>
+                        <igDP:XamDataGrid.FieldLayoutSettings>
+                            <igDP:FieldLayoutSettings AutoGenerateFields="False" AllowAddNew="False" AllowDelete="False" FilterUIType="FilterRecord" />
+                        </igDP:XamDataGrid.FieldLayoutSettings>
+                        <igDP:XamDataGrid.FieldLayouts>
+                            <igDP:FieldLayout>
+                                <igDP:Field Name="Id" Label="ID" Width="80">
+                                    <igDP:Field.Settings>
+                                        <igDP:FieldSettings AllowEdit="False" />
+                                    </igDP:Field.Settings>
+                                </igDP:Field>
+                                <igDP:Field Name="Name" Label="Entity Name" Width="200" />
+                                <igDP:Field Name="Budget" Label="Budget" Width="100" />
+                                <igDP:Field Name="Status" Label="Status" Width="140">
+                                    <igDP:Field.Settings>
+                                        <igDP:FieldSettings EditorType="{x:Type igEditors:XamComboEditor}">
+                                            <igDP:FieldSettings.EditorStyle>
+                                                <Style TargetType="{x:Type igEditors:XamComboEditor}">
+                                                    <Setter Property="ItemsProvider">
+                                                        <Setter.Value>
+                                                            <igEditors:ComboBoxItemsProvider>
+                                                                <igEditors:ComboBoxItemsProvider.Items>
+                                                                    <igEditors:ComboBoxDataItem DisplayText="Active" Value="Active" />
+                                                                    <igEditors:ComboBoxDataItem DisplayText="Pending" Value="Pending" />
+                                                                    <igEditors:ComboBoxDataItem DisplayText="Completed" Value="Completed" />
+                                                                </igEditors:ComboBoxItemsProvider.Items>
+                                                            </igEditors:ComboBoxItemsProvider>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </Style>
+                                            </igDP:FieldSettings.EditorStyle>
+                                        </igDP:FieldSettings>
+                                    </igDP:Field.Settings>
+                                </igDP:Field>
+                                <igDP:Field Name="Details" Label="Action (Dbl Click)" Width="2*" />
+                            </igDP:FieldLayout>
+                        </igDP:XamDataGrid.FieldLayouts>
+                    </igDP:XamDataGrid>
+                </DockPanel>
+
+                <!-- Bottom pane for details edit -->
+                <GridSplitter Grid.Row="1" Grid.ColumnSpan="3" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="LightGray"/>
+                
+                <Border Grid.Row="2" Grid.ColumnSpan="3" Background="#F9F9F9" Padding="10">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Visible" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.SelectedProject, RelativeSource={RelativeSource AncestorType=Window}}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <DockPanel IsEnabled="{Binding DataContext.DraftProject.IsEditable, RelativeSource={RelativeSource AncestorType=Window}}">
+                        <DockPanel DockPanel.Dock="Top" Margin="5,0,5,10">
+                            <TextBlock Text="{Binding DataContext.DraftProject.Id, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Edit Record: {0}'}" FontWeight="Bold" Foreground="Gray" VerticalAlignment="Center" />
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="SaveProjectButton" AutomationProperties.AutomationId="SaveProjectButton" Content="Save Changes" Background="#007ACC" Foreground="White" Padding="10,2" Margin="0,0,5,0" Command="{Binding DataContext.SaveProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}" BorderThickness="0" Cursor="Hand" />
+                                <Button x:Name="CancelProjectButton" AutomationProperties.AutomationId="CancelProjectButton" Content="Cancel / Refresh" Background="White" Foreground="Black" BorderBrush="LightGray" Padding="10,2" Command="{Binding DataContext.CancelProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}" Cursor="Hand" />
+                            </StackPanel>
+                        </DockPanel>
+                        <Grid DataContext="{Binding DataContext.DraftProject, RelativeSource={RelativeSource AncestorType=Window}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0" Margin="5">
+                                <TextBlock Text="Project Name" FontWeight="Bold" Foreground="Gray" />
+                                <TextBox x:Name="txtProjectName" AutomationProperties.AutomationId="txtProjectName" Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15" Padding="3" />
+                                <TextBlock Text="Budget" FontWeight="Bold" Foreground="Gray" />
+                                <TextBox x:Name="txtProjectBudget" AutomationProperties.AutomationId="txtProjectBudget" Text="{Binding Budget, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15" Padding="3" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Margin="5">
+                                <TextBlock Text="Status" FontWeight="Bold" Foreground="Gray" />
+                                <igEditors:XamComboEditor x:Name="cmbProjectStatus" AutomationProperties.AutomationId="cmbProjectStatus" Value="{Binding Status, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15">
+                                    <igEditors:XamComboEditor.ItemsProvider>
+                                        <igEditors:ComboBoxItemsProvider>
+                                            <igEditors:ComboBoxItemsProvider.Items>
+                                                <igEditors:ComboBoxDataItem DisplayText="Active" Value="Active" />
+                                                <igEditors:ComboBoxDataItem DisplayText="Pending" Value="Pending" />
+                                                <igEditors:ComboBoxDataItem DisplayText="Completed" Value="Completed" />
+                                            </igEditors:ComboBoxItemsProvider.Items>
+                                        </igEditors:ComboBoxItemsProvider>
+                                    </igEditors:XamComboEditor.ItemsProvider>
+                                </igEditors:XamComboEditor>
+                                <TextBlock Text="Category" FontWeight="Bold" Foreground="Gray" />
+                                <igEditors:XamComboEditor x:Name="cmbProjectCategory" AutomationProperties.AutomationId="cmbProjectCategory" Value="{Binding Category, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15">
+                                    <igEditors:XamComboEditor.ItemsProvider>
+                                        <igEditors:ComboBoxItemsProvider>
+                                            <igEditors:ComboBoxItemsProvider.Items>
+                                                <igEditors:ComboBoxDataItem DisplayText="Internal Logistics" Value="Internal Logistics" />
+                                                <igEditors:ComboBoxDataItem DisplayText="External Clients" Value="External Clients" />
+                                                <igEditors:ComboBoxDataItem DisplayText="R&amp;D" Value="R&amp;D" />
+                                                <igEditors:ComboBoxDataItem DisplayText="2024 Archive" Value="2024 Archive" />
+                                                <igEditors:ComboBoxDataItem DisplayText="2023 Archive" Value="2023 Archive" />
+                                            </igEditors:ComboBoxItemsProvider.Items>
+                                        </igEditors:ComboBoxItemsProvider>
+                                    </igEditors:XamComboEditor.ItemsProvider>
+                                </igEditors:XamComboEditor>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2" Margin="5">
+                                <TextBlock Text="Details" FontWeight="Bold" Foreground="Gray" />
+                                <TextBox Text="{Binding Details, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15" Padding="3" Height="80" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Grid>
+                    </DockPanel>
+                </Border>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="ListViewTemplate">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="180"/>
+                </Grid.RowDefinitions>
+
+            <igWindows:XamTabControl x:Name="MainTabControl" AutomationProperties.AutomationId="MainTabControl" Grid.Row="0" Margin="5">
+                <!-- List View -->
+                <igWindows:TabItemEx x:Name="ListViewTab" AutomationProperties.AutomationId="ListViewTab" Header="List View">
+                    <ListView x:Name="TasksListView" AutomationProperties.AutomationId="TasksListView" ItemsSource="{Binding DataContext.Tasks, RelativeSource={RelativeSource AncestorType=Window}}" SelectedItem="{Binding DataContext.SelectedTask, RelativeSource={RelativeSource AncestorType=Window}}" Margin="5" MouseDoubleClick="Tasks_MouseDoubleClick">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Task ID" DisplayMemberBinding="{Binding Id}" Width="150"/>
+                                <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="200" />
+                                <GridViewColumn Header="Description" DisplayMemberBinding="{Binding Description}" Width="350" />
+                                <GridViewColumn Header="Assignee" DisplayMemberBinding="{Binding Assignee}" Width="200"/>
+                                <GridViewColumn Header="Priority" DisplayMemberBinding="{Binding Priority}" Width="150"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </igWindows:TabItemEx>
+                
+                <!-- Card Layout View -->
+                <igWindows:TabItemEx x:Name="CardViewTab" AutomationProperties.AutomationId="CardViewTab" Header="Card View">
+                    <ListBox x:Name="TasksCardView" AutomationProperties.AutomationId="TasksCardView" ItemsSource="{Binding DataContext.Tasks, RelativeSource={RelativeSource AncestorType=Window}}" SelectedItem="{Binding DataContext.SelectedTask, RelativeSource={RelativeSource AncestorType=Window}}" BorderThickness="0" Background="#F0F0F0" MouseDoubleClick="Tasks_MouseDoubleClick" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="3" VerticalAlignment="Top" />
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="#DDDDDD" BorderThickness="1" CornerRadius="4" Background="White"
+                                            Margin="10" Padding="15" Width="280">
+                                    <Border.Effect>
+                                        <DropShadowEffect Color="Gray" Direction="320" ShadowDepth="2" Opacity="0.3" BlurRadius="5"/>
+                                    </Border.Effect>
+                                    <StackPanel>
+                                        <DockPanel LastChildFill="False">
+                                            <TextBlock DockPanel.Dock="Left" Text="{Binding Id}" Foreground="Gray" FontWeight="Bold"/>
+                                            <TextBlock DockPanel.Dock="Right" Text="{Binding Priority}" Foreground="#007ACC" FontWeight="Bold"/>
+                                        </DockPanel>
+                                        <TextBlock Text="{Binding Title}" FontWeight="Bold" FontSize="16" Margin="0,10,0,5" />
+                                        <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="#555555" Height="40" Margin="0,0,0,10" />
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="Assignee: " Foreground="Gray" />
+                                            <TextBlock Text="{Binding Assignee}" FontStyle="Italic" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </igWindows:TabItemEx>
+            </igWindows:XamTabControl>
+
+            <GridSplitter Grid.Row="1" Height="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" Background="LightGray"/>
+            
+            <Border Grid.Row="2" Background="#F9F9F9" Padding="10">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DataContext.SelectedTask, RelativeSource={RelativeSource AncestorType=Window}}" Value="{x:Null}">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <DockPanel>
+                    <DockPanel DockPanel.Dock="Top" Margin="5,0,5,10">
+                        <TextBlock Text="{Binding DataContext.DraftTask.Id, RelativeSource={RelativeSource AncestorType=Window}, StringFormat='Edit Task: {0}'}" FontWeight="Bold" Foreground="Gray" VerticalAlignment="Center" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button x:Name="SaveTaskButton" AutomationProperties.AutomationId="SaveTaskButton" Content="Save Changes" Background="#007ACC" Foreground="White" Padding="10,2" Margin="0,0,5,0" Command="{Binding DataContext.SaveTaskCommand, RelativeSource={RelativeSource AncestorType=Window}}" BorderThickness="0" Cursor="Hand" />
+                            <Button x:Name="CancelTaskButton" AutomationProperties.AutomationId="CancelTaskButton" Content="Cancel / Refresh" Background="White" Foreground="Black" BorderBrush="LightGray" Padding="10,2" Command="{Binding DataContext.CancelTaskCommand, RelativeSource={RelativeSource AncestorType=Window}}" Cursor="Hand" />
+                        </StackPanel>
+                    </DockPanel>
+                    <Grid DataContext="{Binding DataContext.DraftTask, RelativeSource={RelativeSource AncestorType=Window}}">
+                       <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="5">
+                            <TextBlock Text="Title" FontWeight="Bold" Foreground="Gray" />
+                            <TextBox x:Name="txtTaskTitle" AutomationProperties.AutomationId="txtTaskTitle" Text="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15" Padding="3" />
+                            <TextBlock Text="Due Date" FontWeight="Bold" Foreground="Gray" />
+                            <TextBox x:Name="txtTaskDueDate" AutomationProperties.AutomationId="txtTaskDueDate" Text="{Binding Date, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15" Padding="3" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="5">
+                            <TextBlock Text="Assignee" FontWeight="Bold" Foreground="Gray" />
+                            <TextBox x:Name="txtTaskAssignee" AutomationProperties.AutomationId="txtTaskAssignee" Text="{Binding Assignee, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15" Padding="3" />
+                            <TextBlock Text="Priority" FontWeight="Bold" Foreground="Gray" />
+                            <igEditors:XamComboEditor x:Name="cmbTaskPriority" AutomationProperties.AutomationId="cmbTaskPriority" Value="{Binding Priority, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15">
+                                <igEditors:XamComboEditor.ItemsProvider>
+                                    <igEditors:ComboBoxItemsProvider>
+                                        <igEditors:ComboBoxItemsProvider.Items>
+                                            <igEditors:ComboBoxDataItem DisplayText="High" Value="High" />
+                                            <igEditors:ComboBoxDataItem DisplayText="Medium" Value="Medium" />
+                                            <igEditors:ComboBoxDataItem DisplayText="Low" Value="Low" />
+                                        </igEditors:ComboBoxItemsProvider.Items>
+                                    </igEditors:ComboBoxItemsProvider>
+                                </igEditors:XamComboEditor.ItemsProvider>
+                            </igEditors:XamComboEditor>
+                            </StackPanel>
+                        <StackPanel Grid.Column="2" Margin="5">
+                            <TextBlock Text="Description" FontWeight="Bold" Foreground="Gray" />
+                            <TextBox x:Name="txtTaskDescription" AutomationProperties.AutomationId="txtTaskDescription" Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,15" Padding="3" Height="50" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Grid>
+                </DockPanel>
+            </Border>
+        </Grid>
+        </DataTemplate>
+    </Window.Resources>
+    
+    <DockPanel>
+        <!-- Menu on top with icons -->
+        <Menu DockPanel.Dock="Top" Background="#F3F3F3" Padding="5">
+            <MenuItem x:Name="menuDataExplorer" AutomationProperties.AutomationId="menuDataExplorer" Command="{Binding ShowGridCommand}" Padding="10,5">
+                <MenuItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📁 " />
+                        <TextBlock Text="Data Explorer" />
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+            <MenuItem x:Name="menuTasksAndCards" AutomationProperties.AutomationId="menuTasksAndCards" Command="{Binding ShowListCommand}" Padding="10,5">
+                <MenuItem.Header>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="📋 " />
+                        <TextBlock Text="Tasks &amp; Cards" />
+                    </StackPanel>
+                </MenuItem.Header>
+            </MenuItem>
+        </Menu>
+
+        <StatusBar DockPanel.Dock="Bottom" Background="#007ACC" Foreground="White">
+            <StatusBarItem Content="Ready" />
+            <StatusBarItem HorizontalAlignment="Right" Content="WPF - .NET 4.8 MVVM" />
+        </StatusBar>
+        
+        <ContentControl Content="{Binding CurrentViewName}">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Style.Triggers>
+                        <!-- GRID VIEW -->
+                        <DataTrigger Binding="{Binding CurrentViewName}" Value="Grid">
+                            <Setter Property="ContentTemplate" Value="{StaticResource GridViewTemplate}" />
+                        </DataTrigger>
+
+                        <!-- LIST & CARD VIEW -->
+                        <DataTrigger Binding="{Binding CurrentViewName}" Value="List">
+                            <Setter Property="ContentTemplate" Value="{StaticResource ListViewTemplate}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
+    </DockPanel>
+</Window>
